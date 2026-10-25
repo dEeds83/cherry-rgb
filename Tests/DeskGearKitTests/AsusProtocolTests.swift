@@ -84,5 +84,6 @@ private func bytes(_ s: String) -> [UInt8] {
         #expect(before.chargePercent == 50)
         #expect(after.chargePercent == 75)
         #expect(after.sleepRaw == 2 && after.alertRaw == 1)
+        #expect(PowerInfo(bytes("12 07 00 00 04 02 01")).chargePercent == 100)
     }
 }

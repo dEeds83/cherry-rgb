@@ -27,7 +27,7 @@ der Geräte (Cherry: Usage Page `0xFF1C`, ASUS: `0xFF01`) aus dem Userspace (IOK
 - Tastenbelegung der 8 Tasten: Maus-Funktionen, DPI-Wechsel, Tastatur-Tasten, deaktivieren
 - Beleuchtung je Zone (Logo, Scrollrad, Unterseite): Statisch, Breathing, Spectrum, Wave,
   Reaktiv, Comet, Akkustand – mit Farbe, Helligkeit, Tempo
-- Akkustand (experimentell, siehe unten)
+- Akkustand in 25-%-Stufen
 
 Änderungen werden erst mit **„In Maus speichern“** geschrieben und landen im aktiven Profil.
 Funktioniert auch über den 2,4-GHz-Dongle; schläft die Maus, kurz bewegen.
@@ -125,7 +125,7 @@ Unnummerierte 64-Byte-Reports, Byte 0–1 = Befehl (u16 LE), Antwort im selben F
 | LEDs lesen | `12 03` | je Zone 5 Byte ab Byte 4: Modus, Helligkeit, R, G, B |
 | Einstellungen | `12 04` | 4 × DPI (u16, `(dpi/2 − 50)/50`), Rate, Entprellung, Winkelkorrektur |
 | Tasten lesen | `12 05` | je Taste 2 Byte ab Byte 4: Aktion, Typ |
-| Energie (experimentell) | `12 07` | Byte 4 Ladung (0–4, stieg beim Laden), 5 Sleep?, 6 Warnschwelle? |
+| Energie | `12 07` | Byte 4 Ladung (0–4 = 0–100 %), 5 Sleep?, 6 Warnschwelle? |
 | Profil setzen | `50 02 <n>` | |
 | Speichern | `50 03` | |
 | Taste setzen | `51 21` | Byte 4 Quelle, 6 Ziel, 7 Typ (0 Taste, 1 Maus) |
@@ -142,9 +142,10 @@ Details in `Sources/DeskGearKit/AsusProtocol.swift`.
 
 ## Bekannte Lücken
 
-- **Akkustand der Chakram:** kein öffentlich dokumentierter Befehl. In `12 07` stieg
-  Byte 4 nach ca. 1 h am Ladekabel von 2 auf 3 – das wird als Ladung in Stufen à 25 %
-  gedeutet. Nur eine Beobachtung, daher weiter „experimentell“ (grob, kein Prozentwert).
+- **Akkustand der Chakram:** Die Maus meldet nur 5 Stufen (0–4), also auf 25 % genau.
+  Der Befehl `12 07` ist nicht offiziell dokumentiert; geprüft an einer Chakram
+  (Firmware 13.11.33): Byte 4 fiel ohne Kabel von 3 auf 2 und stieg beim Laden
+  über 3 auf 4.
 - **Chakram-Joystick, Lift-off-Distanz, Energiesparzeit, Makros:** nicht unterstützt
   (Protokoll unbekannt, bräuchte USB-Mitschnitt von Armoury Crate).
 - Tastenbelegung ist implementiert, aber nur Lesen wurde an echter Hardware geprüft.

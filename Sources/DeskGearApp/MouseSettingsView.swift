@@ -192,7 +192,7 @@ private struct InfoTab: View {
             LabeledContent("Firmware", value: mouse.current?.firmware ?? "–")
             LabeledContent("Aktives Profil", value: "\((mouse.current?.profile ?? 0) + 1)")
             if let p = mouse.current?.power {
-                Section("Energie (experimentell)") {
+                Section("Energie") {
                     LabeledContent("Akku", value: p.chargePercent.map { "ca. \($0) %" } ?? "unbekannt")
                     LabeledContent("Rohwerte 12 07", value: String(format: "%02x %02x %02x", p.chargeRaw, p.sleepRaw, p.alertRaw))
                 }

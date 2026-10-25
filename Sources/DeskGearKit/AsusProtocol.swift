@@ -154,15 +154,16 @@ public struct MouseState: Equatable, Sendable {
     public var angleSnapping = false
     public var buttons: [ButtonAction] = []
     public var leds: [MouseLED] = []
-    /// Answer bytes 4…6 of `12 07` (charge, sleep, alert level – experimental).
+    /// Answer bytes 4…6 of `12 07` (charge, sleep, alert level).
     public var power: PowerInfo?
 
     public init() {}
 }
 
-/// Experimental answer of `12 07`. Byte 4 rose from 2 to 3 while charging
-/// (Chakram, firmware 13.11.33), so it is taken as the charge level; bytes 5
-/// and 6 stayed constant and are assumed to be sleep timeout and alert level.
+/// Answer of `12 07`. Byte 4 is the charge level in 25 % steps: on a Chakram
+/// (firmware 13.11.33) it fell from 3 to 2 unplugged and rose 2 → 3 → 4 on the
+/// charging cable. Bytes 5 and 6 never changed and are assumed to be sleep
+/// timeout and alert level (unverified).
 public struct PowerInfo: Equatable, Sendable {
     public let chargeRaw: UInt8
     public let sleepRaw: UInt8
@@ -174,7 +175,7 @@ public struct PowerInfo: Equatable, Sendable {
         alertRaw = r.count > 6 ? r[6] : 0
     }
 
-    /// Assuming charge is reported in 25 % steps (0…4).
+    /// Charge in 25 % steps (0…4).
     public var chargePercent: Int? { chargeRaw <= 4 ? Int(chargeRaw) * 25 : nil }
 }
 

@@ -185,7 +185,7 @@ struct MouseSection: View {
                     Text("DPI-Stufe \(s.activeDPIStage + 1): \(s.dpi[safe: s.activeDPIStage] ?? 0) DPI · \(s.pollingRate.hz) Hz")
                         .font(.callout)
                     if let pct = s.power?.chargePercent {
-                        Label("Akku ca. \(pct) % (experimentell)", systemImage: batteryIcon(pct))
+                        Label("Akku ca. \(pct) %", systemImage: batteryIcon(pct))
                             .font(.callout)
                     }
                 } else if mouse.asleep {
