@@ -78,8 +78,11 @@ private func bytes(_ s: String) -> [UInt8] {
     }
 
     @Test func power() {
-        let p = PowerInfo(bytes("12 07 00 00 02 02 01"))
-        #expect(p.chargeRaw == 2)
-        #expect(p.chargePercent == 50)
+        // Captured before and after ~1 h on the charging cable.
+        let before = PowerInfo(bytes("12 07 00 00 02 02 01"))
+        let after = PowerInfo(bytes("12 07 00 00 03 02 01"))
+        #expect(before.chargePercent == 50)
+        #expect(after.chargePercent == 75)
+        #expect(after.sleepRaw == 2 && after.alertRaw == 1)
     }
 }

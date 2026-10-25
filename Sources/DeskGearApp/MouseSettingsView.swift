@@ -194,7 +194,7 @@ private struct InfoTab: View {
             if let p = mouse.current?.power {
                 Section("Energie (experimentell)") {
                     LabeledContent("Akku", value: p.chargePercent.map { "ca. \($0) %" } ?? "unbekannt")
-                    LabeledContent("Rohwerte 12 07", value: String(format: "%02x %02x %02x", p.sleepRaw, p.chargeRaw, p.alertRaw))
+                    LabeledContent("Rohwerte 12 07", value: String(format: "%02x %02x %02x", p.chargeRaw, p.sleepRaw, p.alertRaw))
                 }
             }
         }

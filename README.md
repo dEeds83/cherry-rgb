@@ -125,7 +125,7 @@ Unnummerierte 64-Byte-Reports, Byte 0–1 = Befehl (u16 LE), Antwort im selben F
 | LEDs lesen | `12 03` | je Zone 5 Byte ab Byte 4: Modus, Helligkeit, R, G, B |
 | Einstellungen | `12 04` | 4 × DPI (u16, `(dpi/2 − 50)/50`), Rate, Entprellung, Winkelkorrektur |
 | Tasten lesen | `12 05` | je Taste 2 Byte ab Byte 4: Aktion, Typ |
-| Energie? | `12 07` | Byte 4–6, Bedeutung unbestätigt |
+| Energie (experimentell) | `12 07` | Byte 4 Ladung (0–4, stieg beim Laden), 5 Sleep?, 6 Warnschwelle? |
 | Profil setzen | `50 02 <n>` | |
 | Speichern | `50 03` | |
 | Taste setzen | `51 21` | Byte 4 Quelle, 6 Ziel, 7 Typ (0 Taste, 1 Maus) |
@@ -142,9 +142,9 @@ Details in `Sources/DeskGearKit/AsusProtocol.swift`.
 
 ## Bekannte Lücken
 
-- **Akkustand der Chakram:** kein öffentlich dokumentierter Befehl. `12 07` liefert Werte,
-  die zu „Sleep / Ladung / Warnschwelle“ passen könnten; die Ladung änderte sich beim
-  Laden aber nicht. Anzeige daher als „experimentell“ (Annahme: Stufen à 25 %).
+- **Akkustand der Chakram:** kein öffentlich dokumentierter Befehl. In `12 07` stieg
+  Byte 4 nach ca. 1 h am Ladekabel von 2 auf 3 – das wird als Ladung in Stufen à 25 %
+  gedeutet. Nur eine Beobachtung, daher weiter „experimentell“ (grob, kein Prozentwert).
 - **Chakram-Joystick, Lift-off-Distanz, Energiesparzeit, Makros:** nicht unterstützt
   (Protokoll unbekannt, bräuchte USB-Mitschnitt von Armoury Crate).
 - Tastenbelegung ist implementiert, aber nur Lesen wurde an echter Hardware geprüft.
