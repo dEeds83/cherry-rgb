@@ -1,5 +1,5 @@
 import Testing
-@testable import CherryRGBKit
+@testable import DeskGearKit
 
 private func hex(_ s: String) -> [UInt8] {
     s.split(separator: " ").map { UInt8($0, radix: 16)! }

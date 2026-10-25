@@ -1,5 +1,5 @@
 import AppKit
-import CherryRGBKit
+import DeskGearKit
 import ServiceManagement
 import SwiftUI
 
@@ -51,7 +51,7 @@ final class AppState: ObservableObject {
     }
     @Published private(set) var connectedName: String?
     @Published private(set) var lastError: String?
-    @Published private(set) var hasAccess = CherryKeyboard.hasInputMonitoringAccess
+    @Published private(set) var hasAccess = HIDConnection.hasInputMonitoringAccess
     @Published var launchAtLogin = SMAppService.mainApp.status == .enabled
 
     let keyboard = CherryKeyboard()
@@ -66,24 +66,24 @@ final class AppState: ObservableObject {
             settings = LightingSettings()
         }
 
-        keyboard.log = { NSLog("CherryRGB: %@", $0) }
-        keyboard.onConnectionChange = { [weak self] connected, name in
+        keyboard.connection.log = { NSLog("DeskGear: %@", $0) }
+        keyboard.connection.onConnectionChange = { [weak self] info in
             guard let self else { return }
-            connectedName = connected ? (name ?? "Cherry") : nil
-            if connected {
+            connectedName = info?.product
+            if info != nil {
                 lastError = nil
                 // The keyboard falls back to its own default after replug / wake.
                 scheduleApply(delay: .milliseconds(300))
             }
         }
-        keyboard.onError = { [weak self] err in
+        keyboard.connection.onError = { [weak self] err in
             guard let self else { return }
             lastError = err.description
             if case .accessDenied = err { waitForAccess() }
         }
 
         if !hasAccess {
-            CherryKeyboard.requestInputMonitoringAccess()
+            HIDConnection.requestInputMonitoringAccess()
             waitForAccess()
         }
     }
@@ -129,11 +129,11 @@ final class AppState: ObservableObject {
         guard accessPoll == nil else { return }
         accessPoll = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
-                guard let self, CherryKeyboard.hasInputMonitoringAccess else { return }
+                guard let self, HIDConnection.hasInputMonitoringAccess else { return }
                 self.hasAccess = true
                 self.accessPoll?.invalidate()
                 self.accessPoll = nil
-                self.keyboard.retryPending()
+                self.keyboard.connection.retryPending()
             }
         }
     }

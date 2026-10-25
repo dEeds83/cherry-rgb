@@ -1,15 +1,16 @@
-import CherryRGBKit
+import DeskGearKit
 import SwiftUI
 
 @main
-struct CherryRGBApp: App {
+struct DeskGearApp: App {
     @StateObject private var state = AppState()
+    @StateObject private var mouse = MouseController()
 
     var body: some Scene {
         MenuBarExtra {
-            MenuView().environmentObject(state)
+            MenuView().environmentObject(state).environmentObject(mouse)
         } label: {
-            Image(systemName: state.connectedName == nil ? "keyboard.badge.ellipsis" : "keyboard")
+            Image(systemName: state.connectedName == nil && mouse.connectedName == nil ? "keyboard.badge.ellipsis" : "keyboard")
         }
         .menuBarExtraStyle(.window)
 
@@ -17,17 +18,20 @@ struct CherryRGBApp: App {
             KeyEditorView().environmentObject(state)
         }
         .windowResizability(.contentSize)
+
+        Window("Maus", id: "mouse") {
+            MouseSettingsView().environmentObject(mouse)
+        }
+        .windowResizability(.contentSize)
     }
 }
 
 struct MenuView: View {
     @EnvironmentObject var state: AppState
-    @Environment(\.openWindow) private var openWindow
+    @EnvironmentObject var mouse: MouseController
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            header
-
             if !state.hasAccess {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Für die Tastatur braucht die App die Berechtigung „Eingabeüberwachung“.")
@@ -37,6 +41,51 @@ struct MenuView: View {
                 .padding(8)
                 .background(.orange.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
             }
+
+            KeyboardSection()
+
+            Divider()
+
+            MouseSection()
+
+            Divider()
+
+            Toggle("Beim Login starten", isOn: Binding(
+                get: { state.launchAtLogin },
+                set: { state.setLaunchAtLogin($0) }
+            ))
+            HStack {
+                Spacer()
+                Button("Beenden") { NSApp.terminate(nil) }
+            }
+        }
+        .padding(14)
+        .frame(width: 300)
+    }
+}
+
+struct DeviceHeader: View {
+    let title: String
+    let name: String?
+
+    var body: some View {
+        HStack {
+            Circle()
+                .fill(name == nil ? Color.secondary : Color.green)
+                .frame(width: 8, height: 8)
+            Text(name ?? "\(title): nicht verbunden")
+                .font(.headline)
+        }
+    }
+}
+
+struct KeyboardSection: View {
+    @EnvironmentObject var state: AppState
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            DeviceHeader(title: "Tastatur", name: state.connectedName)
 
             Picker("", selection: $state.settings.kind) {
                 ForEach(LightingKind.allCases) { Text($0.title).tag($0) }
@@ -58,35 +107,14 @@ struct MenuView: View {
                 .frame(width: 140)
             }
 
-            Divider()
-
-            Toggle("Beim Login starten", isOn: Binding(
-                get: { state.launchAtLogin },
-                set: { state.setLaunchAtLogin($0) }
-            ))
-
             HStack {
                 Button("Erneut anwenden") { Task { await state.apply() } }
                 Button("Aus") { state.turnOff() }
-                Spacer()
-                Button("Beenden") { NSApp.terminate(nil) }
             }
 
             if let err = state.lastError {
                 Text(err).font(.caption).foregroundStyle(.red)
             }
-        }
-        .padding(14)
-        .frame(width: 300)
-    }
-
-    private var header: some View {
-        HStack {
-            Circle()
-                .fill(state.connectedName == nil ? Color.secondary : Color.green)
-                .frame(width: 8, height: 8)
-            Text(state.connectedName ?? "Keine Tastatur verbunden")
-                .font(.headline)
         }
     }
 
@@ -134,6 +162,63 @@ struct MenuView: View {
             NSApp.activate(ignoringOtherApps: true)
         }
     }
+}
+
+struct MouseSection: View {
+    @EnvironmentObject var mouse: MouseController
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            DeviceHeader(title: "Maus", name: mouse.connectedName)
+
+            if mouse.connectedName != nil {
+                if let s = mouse.current, let model = mouse.model {
+                    Picker("Profil", selection: Binding(
+                        get: { s.profile },
+                        set: { p in Task { await mouse.switchProfile(p) } }
+                    )) {
+                        ForEach(0..<model.profiles, id: \.self) { Text("\($0 + 1)").tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text("DPI-Stufe \(s.activeDPIStage + 1): \(s.dpi[safe: s.activeDPIStage] ?? 0) DPI · \(s.pollingRate.hz) Hz")
+                        .font(.callout)
+                    if let pct = s.power?.chargePercent {
+                        Label("Akku ca. \(pct) % (experimentell)", systemImage: batteryIcon(pct))
+                            .font(.callout)
+                    }
+                } else if mouse.asleep {
+                    Text("Maus schläft – kurz bewegen").font(.callout).foregroundStyle(.secondary)
+                } else {
+                    ProgressView().controlSize(.small)
+                }
+
+                Button("Einstellungen …") {
+                    openWindow(id: "mouse")
+                    NSApp.activate(ignoringOtherApps: true)
+                }
+            }
+
+            if let err = mouse.lastError {
+                Text(err).font(.caption).foregroundStyle(.red)
+            }
+        }
+    }
+
+    private func batteryIcon(_ pct: Int) -> String {
+        switch pct {
+        case ..<13: "battery.0percent"
+        case ..<38: "battery.25percent"
+        case ..<63: "battery.50percent"
+        case ..<88: "battery.75percent"
+        default: "battery.100percent"
+        }
+    }
+}
+
+extension Array {
+    subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
 }
 
 let colorPresets: [RGB] = [

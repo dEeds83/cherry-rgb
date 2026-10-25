@@ -1,6 +1,6 @@
 import Foundation
 
-// Packet format of the "new" Cherry RGB protocol (G80-3000N, MX 3.0S, MX 10.0N, ...).
+// Packet format of the "new" Desk Gear protocol (G80-3000N, MX 3.0S, MX 10.0N, ...).
 // Reverse engineered by the cherryrgb-rs project (MIT, Sebastian Kraus):
 // https://github.com/skraus-dev/cherryrgb-rs
 //

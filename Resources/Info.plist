@@ -3,24 +3,24 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>de.fabiandietz.cherryrgb</string>
+    <string>de.fabiandietz.deskgear</string>
     <key>CFBundleName</key>
-    <string>Cherry RGB</string>
+    <string>Desk Gear</string>
     <key>CFBundleDisplayName</key>
-    <string>Cherry RGB</string>
+    <string>Desk Gear</string>
     <key>CFBundleExecutable</key>
-    <string>CherryRGBApp</string>
+    <string>DeskGearApp</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>0.1.0</string>
+    <string>0.2.0</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>2</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>Protocol based on cherryrgb-rs (MIT, Sebastian Kraus)</string>
+    <string>Protocols based on cherryrgb-rs and libratbag (MIT)</string>
 </dict>
 </plist>

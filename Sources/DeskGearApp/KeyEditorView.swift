@@ -1,4 +1,4 @@
-import CherryRGBKit
+import DeskGearKit
 import SwiftUI
 
 struct KeyEditorView: View {
